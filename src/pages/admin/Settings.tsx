@@ -93,7 +93,7 @@ export default function Settings() {
 
     try {
       // Load existing synced payment methods
-      const pmRes = await apiFetch('/api/settings/payment-methods', { requireAuth: false });
+      const pmRes = await apiFetch(`/api/settings/payment-methods?_=${Date.now()}`, { requireAuth: false });
       console.log('[Settings] Loaded payment methods:', pmRes);
       if (pmRes.success && pmRes.data?.paymentFee) {
         setPaymentMethods(pmRes.data.paymentFee);

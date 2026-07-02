@@ -37,7 +37,7 @@ export default function Transactions() {
 
   const loadPaymentMethods = async () => {
     try {
-      const res = await apiFetch('/api/settings/payment-methods');
+      const res = await apiFetch(`/api/settings/payment-methods?_=${Date.now()}`);
       if (res && res.success && res.data?.paymentFee) {
         setPaymentMethods(res.data.paymentFee);
       }

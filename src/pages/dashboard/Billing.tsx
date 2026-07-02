@@ -76,7 +76,7 @@ export const Billing: React.FC = () => {
 
       // Fetch active payment methods for name mapping
       try {
-        const pmRes = await apiFetch('/api/settings/payment-methods', { requireAuth: false });
+        const pmRes = await apiFetch(`/api/settings/payment-methods?_=${Date.now()}`, { requireAuth: false });
         if (pmRes?.success && Array.isArray(pmRes.data?.paymentFee)) {
           setPaymentMethods(pmRes.data.paymentFee);
         }

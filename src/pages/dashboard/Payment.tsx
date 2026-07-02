@@ -214,7 +214,7 @@ export default function Payment() {
 
   async function loadPaymentMethods(presetMethod?: string) {
     try {
-      const res = await apiFetch('/api/settings/payment-methods', { requireAuth: false });
+      const res = await apiFetch(`/api/settings/payment-methods?_=${Date.now()}`, { requireAuth: false });
       if (res?.success && res.data?.paymentFee) {
         const methodsList = res.data.paymentFee as DuitkuPaymentMethod[];
         setPaymentMethods(methodsList);
