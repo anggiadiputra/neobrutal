@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './components/ui/Toast';
 import Loader from './components/ui/Loader';
+import { Analytics } from '@vercel/analytics/react';
 
 // Lazy load Public Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -84,6 +85,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </Router>
+      <Analytics />
     </ToastProvider>
   );
 }
