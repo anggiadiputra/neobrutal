@@ -86,14 +86,20 @@ export default function Settings() {
           setLogoPreviewUrl(`${getApiUrl()}${s.app_logo}`);
         }
       }
+    } catch (err: any) {
+      console.error('[Settings] Error loading admin settings:', err);
+      setErrorMsg(err.message || 'Gagal memuat pengaturan sistem.');
+    }
 
+    try {
       // Load existing synced payment methods
       const pmRes = await apiFetch('/api/settings/payment-methods', { requireAuth: false });
+      console.log('[Settings] Loaded payment methods:', pmRes);
       if (pmRes.success && pmRes.data?.paymentFee) {
         setPaymentMethods(pmRes.data.paymentFee);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Gagal memuat pengaturan sistem.');
+      console.error('[Settings] Error loading payment methods:', err);
     }
   };
 
