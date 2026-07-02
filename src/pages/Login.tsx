@@ -13,7 +13,7 @@ export const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState(import.meta.env.DEV ? 'local-dev-bypass' : '');
 
   const resendIntervalRef = useRef<number | null>(null);
 
@@ -271,11 +271,13 @@ export const Login: React.FC = () => {
                 </div>
 
                 {/* Cloudflare Turnstile */}
-                <Turnstile
-                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                  onVerify={(token) => setTurnstileToken(token)}
-                  onExpire={() => setTurnstileToken('')}
-                />
+                {!import.meta.env.DEV && (
+                  <Turnstile
+                    siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                    onVerify={(token) => setTurnstileToken(token)}
+                    onExpire={() => setTurnstileToken('')}
+                  />
+                )}
 
                 <button
                   type="submit"
