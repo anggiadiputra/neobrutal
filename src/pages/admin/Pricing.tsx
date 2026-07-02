@@ -18,7 +18,8 @@ export default function Pricing() {
     id: '',
     extension: '',
     markup_type: 'fixed', // fixed or percentage
-    markup_value: 0
+    markup_value: 0,
+    whois_price: 15000
   });
   const [modalIsEdit, setModalIsEdit] = useState(false);
 
@@ -64,7 +65,8 @@ export default function Pricing() {
       id: '',
       extension: '',
       markup_type: 'fixed',
-      markup_value: 0
+      markup_value: 0,
+      whois_price: 15000
     });
     setModalIsEdit(false);
     setShowModal(true);
@@ -75,7 +77,8 @@ export default function Pricing() {
       id: String(markup.id),
       extension: markup.extension,
       markup_type: markup.markup_type || 'fixed',
-      markup_value: markup.markup_value || 0
+      markup_value: markup.markup_value || 0,
+      whois_price: markup.whois_price !== undefined ? Number(markup.whois_price) : 15000
     });
     setModalIsEdit(true);
     setShowModal(true);
@@ -108,7 +111,8 @@ export default function Pricing() {
           id: modalForm.id ? Number(modalForm.id) : undefined,
           extension: modalForm.extension.trim(),
           markup_type: modalForm.markup_type,
-          markup_value: Number(modalForm.markup_value)
+          markup_value: Number(modalForm.markup_value),
+          whois_price: Number(modalForm.whois_price)
         })
       });
       if (res.success) {
@@ -246,6 +250,10 @@ export default function Pricing() {
                     <span className="text-zinc-500">Nilai Markup:</span>
                     <span>{m.markup_type === 'percentage' ? `${m.markup_value}%` : formatCurrency(m.markup_value)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-500">Harga WHOIS:</span>
+                    <span>{m.whois_price > 0 ? formatCurrency(m.whois_price) : 'Gratis / Free'}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -349,6 +357,19 @@ export default function Pricing() {
                       onChange={(e) => setModalForm(prev => ({ ...prev, markup_value: Number(e.target.value) }))}
                       className="px-3 py-2 border-2 border-black bg-white text-black rounded-sm outline-none font-bold"
                       placeholder="Nilai nominal rupiah atau persen"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label>Harga WHOIS (Rupiah)</label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      value={modalForm.whois_price}
+                      onChange={(e) => setModalForm(prev => ({ ...prev, whois_price: Number(e.target.value) }))}
+                      className="px-3 py-2 border-2 border-black bg-white text-black rounded-sm outline-none font-bold"
+                      placeholder="Harga perlindungan WHOIS Privacy"
                     />
                   </div>
                 </div>
