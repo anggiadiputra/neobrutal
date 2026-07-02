@@ -353,9 +353,12 @@ export const Layout: React.FC<LayoutProps> = ({
               <a href="/login" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>Masuk</a>
             </div>
             <div className="flex flex-col gap-2">
-              <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400">Partner</h4>
-              <a href="https://rdash.id" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>RDASH API</a>
-              <a href="https://docs.rdash.id" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>Dokumentasi</a>
+              <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400">Informasi & Legal</h4>
+              <a href="/about" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>Tentang Kami</a>
+              <a href="/contact" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>Kontak</a>
+              <a href="/privacy-policy" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="/disclaimer" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>Disklaimer</a>
+              <a href="/terms" className="text-sm font-bold text-zinc-500 hover:text-black" style={{ textDecoration: 'none' }}>TOS</a>
             </div>
           </div>
         </div>

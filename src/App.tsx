@@ -13,6 +13,11 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const Checkout = lazy(() => import('./pages/Checkout'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Disclaimer = lazy(() => import('./pages/Disclaimer'));
+const Terms = lazy(() => import('./pages/Terms'));
 
 // Lazy load Dashboard Customer Pages
 const Overview = lazy(() => import('./pages/dashboard/Overview'));
@@ -43,6 +48,11 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/whois" element={<Whois />} />
             <Route path="/prices" element={<Prices />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<Privacy />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
