@@ -277,9 +277,7 @@ export default function Payment() {
   }, [state, inquiryResult]);
 
   // Pricing calculations
-  const basePrice = checkoutData ? Number(checkoutData.regularPrice || checkoutData.price) : 0;
   const finalPrice = checkoutData ? Number(checkoutData.price) : 0;
-  const saving = basePrice - finalPrice;
   const taxRate = settings.tax_enabled ? (Number(settings.tax_rate) || 0) : 0;
   const tax = Math.round(finalPrice * (taxRate / 100));
   const selectedMethodObj = paymentMethods.find(pm => pm.paymentMethod === selectedMethod);
