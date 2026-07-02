@@ -18,7 +18,7 @@ export const Contact: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout title="Hubungi Kami">
       <div className="max-w-[900px] mx-auto text-left py-12 px-4 animate-[fadeSlideUp_0.25s_ease-out]">
         {/* Header */}
         <div className="mb-8 border-b-3 border-black pb-4">

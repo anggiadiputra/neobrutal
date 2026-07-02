@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout';
 
 export const About: React.FC = () => {
   return (
-    <Layout>
+    <Layout title="Tentang Kami">
       <div className="max-w-[800px] mx-auto text-left py-12 px-4 animate-[fadeSlideUp_0.25s_ease-out]">
         {/* Header */}
         <div className="mb-8 border-b-3 border-black pb-4">
