@@ -3,7 +3,6 @@ import AdminLayout from '../../layouts/AdminLayout';
 import { apiFetch } from '../../utils/api';
 
 export default function Pricing() {
-  const [basePrices, setBasePrices] = useState<any[]>([]);
   const [markups, setMarkups] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -37,20 +36,13 @@ export default function Pricing() {
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const [pricesRes, markupsRes] = await Promise.all([
-        apiFetch('/api/domains/prices?limit=100', { requireAuth: false }),
-        apiFetch('/api/admin/pricing-markups')
-      ]);
-
-      if (pricesRes.success && Array.isArray(pricesRes.data)) {
-        setBasePrices(pricesRes.data);
-      }
-      if (markupsRes.success && Array.isArray(markupsRes.data)) {
-        setMarkups(markupsRes.data);
+      const res = await apiFetch('/api/admin/pricing-markups');
+      if (res.success && Array.isArray(res.data)) {
+        setMarkups(res.data);
       }
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || 'Gagal memuat data harga dan markup.');
+      setErrorMsg(err.message || 'Gagal memuat data markup.');
     } finally {
       setIsLoading(false);
     }
@@ -127,43 +119,10 @@ export default function Pricing() {
     }
   };
 
-  // Build a mapped list of base prices + pricing markup overrides to display retail prices
-  const getMappedPrices = () => {
-    const list = [...basePrices];
-
-    // Find if there is a default fallback markup '*'
-    const defaultMarkup = markups.find(m => m.extension === '*');
-
-    return list.map(item => {
-      // Find specific markup
-      const specificMarkup = markups.find(m => m.extension.toLowerCase() === item.extension.toLowerCase());
-      const activeMarkup = specificMarkup || defaultMarkup || null;
-
-      let margin = 0;
-      let finalPrice = item.registerPrice;
-
-      if (activeMarkup) {
-        const val = parseFloat(activeMarkup.markup_value);
-        if (activeMarkup.markup_type === 'percentage') {
-          margin = item.registerPrice * (val / 100);
-        } else {
-          margin = val;
-        }
-        finalPrice = item.registerPrice + margin;
-      }
-
-      return {
-        ...item,
-        markup: activeMarkup,
-        margin,
-        finalPrice
-      };
-    }).filter(item => 
-      item.extension.toLowerCase().includes(searchQuery.trim().toLowerCase())
-    );
-  };
-
-  const mappedList = getMappedPrices();
+  // Filter custom markups list based on search query
+  const filteredMarkups = markups.filter(m =>
+    m.extension.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
 
   return (
     <AdminLayout title="Harga Domain" activeMenu="pricing">
@@ -215,11 +174,15 @@ export default function Pricing() {
           
           {isLoading ? (
             <div className="text-center py-6 font-bold text-zinc-500">Memuat data markup...</div>
-          ) : markups.length === 0 ? (
-            <div className="text-center py-6 font-bold text-zinc-500">Belum ada markup kustom terdaftar. Sistem menggunakan default.</div>
+          ) : filteredMarkups.length === 0 ? (
+            <div className="text-center py-6 font-bold text-zinc-500">
+              {searchQuery.trim() 
+                ? 'Tidak ada markup kustom yang cocok dengan pencarian Anda.' 
+                : 'Belum ada markup kustom terdaftar. Sistem menggunakan default.'}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 font-bold text-xs">
-              {markups.map(m => (
+              {filteredMarkups.map(m => (
                 <div key={m.id} className="border-2 border-black rounded-sm p-4 bg-zinc-50 flex flex-col gap-3 shadow-sm">
                   <div className="flex justify-between items-center border-b border-zinc-200 pb-2">
                     <span className="font-mono text-sm font-black text-rose-600 bg-rose-50 px-2 py-0.5 border border-rose-300">
@@ -256,57 +219,6 @@ export default function Pricing() {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-
-        {/* Pricing List Table */}
-        <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-0! overflow-hidden mb-6 font-bold">
-          <div className="p-4 border-b-2 border-black bg-zinc-50">
-            <h3 className="text-sm font-black text-black">Tabel Estimasi Harga Jual Domain Pelanggan</h3>
-          </div>
-
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 text-zinc-500 font-bold gap-3">
-              <div className="w-8 h-8 border-3 border-zinc-200 border-t-zinc-800 rounded-full animate-spin"></div>
-              <p className="text-xs">Memuat estimasi harga...</p>
-            </div>
-          ) : mappedList.length === 0 ? (
-            <div className="py-12 text-center text-zinc-500">Tidak ada ekstensi yang cocok.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs font-bold text-black">
-                <thead>
-                  <tr className="bg-zinc-100 border-b-3 border-black">
-                    <th className="p-4 border-r border-black font-black w-24">Ekstensi</th>
-                    <th className="p-4 border-r border-black text-right">Modal RDASH</th>
-                    <th className="p-4 border-r border-black">Aturan Markup</th>
-                    <th className="p-4 border-r border-black text-right">Margin Keuntungan</th>
-                    <th className="p-4 text-right">Harga Jual (Est)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mappedList.map((p, idx) => (
-                    <tr key={idx} className="border-b-2 border-black hover:bg-zinc-50">
-                      <td className="p-4 border-r border-black font-mono text-sm text-rose-600">{p.extension}</td>
-                      <td className="p-4 border-r border-black text-right text-zinc-500">{formatCurrency(p.registerPrice)}</td>
-                      <td className="p-4 border-r border-black">
-                        {p.markup ? (
-                          <span className="bg-cyan-50 text-cyan-800 px-2 py-0.5 border border-cyan-300 font-extrabold text-[10px]">
-                            {p.markup.markup_type === 'percentage' ? `${p.markup.markup_value}%` : formatCurrency(p.markup.markup_value)}
-                          </span>
-                        ) : (
-                          <span className="text-zinc-400 font-normal">Tidak ada markup</span>
-                        )}
-                      </td>
-                      <td className="p-4 border-r border-black text-right text-emerald-600 font-black">
-                        +{formatCurrency(p.margin)}
-                      </td>
-                      <td className="p-4 text-right text-black font-black text-sm">{formatCurrency(p.finalPrice)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           )}
         </div>
