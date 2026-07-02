@@ -10,6 +10,7 @@ import {
   type RegionItem
 } from '../utils/region';
 import type { DomainPriceItem } from './Prices';
+import Turnstile from '../components/ui/Turnstile';
 
 const formatCurrency = (val: string | number) => {
   const num = typeof val === 'string' ? parseFloat(val) : val;
@@ -27,6 +28,7 @@ export const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Registrar Profile State
   const [organization, setOrganization] = useState('');
@@ -248,7 +250,8 @@ export const Register: React.FC = () => {
           city: selectedRegencyName,
           state: selectedProvinceName,
           postal_code: postalCode,
-          country_code: countryCode.toUpperCase()
+          country_code: countryCode.toUpperCase(),
+          turnstileToken
         })
       });
 
@@ -566,10 +569,17 @@ export const Register: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Cloudflare Turnstile */}
+                <Turnstile
+                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                  onVerify={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken('')}
+                />
+
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="btn btn-primary w-full mt-4 h-12 font-black shadow-[3px_3px_0_#000]"
+                  disabled={isLoading || !turnstileToken}
+                  className="btn btn-primary w-full mt-4 h-12 font-black shadow-[3px_3px_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Memproses...' : 'Daftar Sekarang'}
                 </button>

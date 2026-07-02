@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../layouts/Layout';
 import { apiFetch } from '../utils/api';
 import { requireGuest } from '../utils/auth';
+import Turnstile from '../components/ui/Turnstile';
 
 export const Login: React.FC = () => {
   const [step, setStep] = useState<1 | 2>(1);
@@ -12,6 +13,7 @@ export const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const resendIntervalRef = useRef<number | null>(null);
 
@@ -63,7 +65,7 @@ export const Login: React.FC = () => {
       const response = await apiFetch('/api/auth/login-step1', {
         method: 'POST',
         requireAuth: false,
-        body: JSON.stringify({ email: cleanEmail, password })
+        body: JSON.stringify({ email: cleanEmail, password, turnstileToken })
       });
 
       setStep(2);
@@ -268,10 +270,17 @@ export const Login: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Cloudflare Turnstile */}
+                <Turnstile
+                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                  onVerify={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken('')}
+                />
+
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="btn btn-primary w-full mt-4 h-12 font-black shadow-[3px_3px_0_#000]"
+                  disabled={isLoading || !turnstileToken}
+                  className="btn btn-primary w-full mt-4 h-12 font-black shadow-[3px_3px_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Memverifikasi...' : 'Lanjutkan ke Verifikasi'}
                 </button>
