@@ -10,6 +10,22 @@ export const Turnstile: React.FC<TurnstileProps> = ({ siteKey, onVerify, onExpir
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let widgetId: string | null = null;
+
+    const renderWidget = () => {
+      if (containerRef.current && window.turnstile) {
+        try {
+          widgetId = window.turnstile.render(containerRef.current, {
+            sitekey: siteKey,
+            callback: onVerify,
+            'expired-callback': onExpire,
+          });
+        } catch (err) {
+          console.warn('Turnstile rendering failed:', err);
+        }
+      }
+    };
+
     // Inject script tag
     if (!window.turnstile) {
       const script = document.createElement('script');
@@ -23,22 +39,6 @@ export const Turnstile: React.FC<TurnstileProps> = ({ siteKey, onVerify, onExpir
       };
     } else {
       renderWidget();
-    }
-
-    let widgetId: string | null = null;
-
-    function renderWidget() {
-      if (containerRef.current && window.turnstile) {
-        try {
-          widgetId = window.turnstile.render(containerRef.current, {
-            sitekey: siteKey,
-            callback: onVerify,
-            'expired-callback': onExpire,
-          });
-        } catch (err) {
-          console.warn('Turnstile rendering failed:', err);
-        }
-      }
     }
 
     return () => {
