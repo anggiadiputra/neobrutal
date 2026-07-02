@@ -281,7 +281,20 @@ export default function Payment() {
   const taxRate = settings.tax_enabled ? (Number(settings.tax_rate) || 0) : 0;
   const tax = Math.round(finalPrice * (taxRate / 100));
   const selectedMethodObj = paymentMethods.find(pm => pm.paymentMethod === selectedMethod);
-  const admin = selectedMethodObj ? Number(selectedMethodObj.fee) : 0;
+  let admin = selectedMethodObj ? Number(selectedMethodObj.fee) : 0;
+  
+  const isQris = selectedMethod && (
+    ['SP', 'NQ', 'DQ', 'OQ', 'LQ', 'GQ'].includes(selectedMethod) || 
+    selectedMethod.toLowerCase().includes('qris') || 
+    (selectedMethodObj && selectedMethodObj.paymentName.toLowerCase().includes('qris'))
+  );
+  
+  if (isQris) {
+    const subtotal = finalPrice + tax;
+    const grandTotalCalculated = Math.round(subtotal / (1 - 0.007));
+    admin = grandTotalCalculated - subtotal;
+  }
+  
   const grandTotal = finalPrice + tax + admin;
   
   // Clean domain extension to avoid double dots (e.g. hallopod..com -> hallopod.com)
