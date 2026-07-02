@@ -223,7 +223,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
               {isDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-64 bg-white rounded-lg border-2 border-black shadow-[4px_4px_0_0_#000] z-50 text-left flex flex-col gap-1"
+                  className="absolute left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 mt-2 w-64 bg-white rounded-lg border-2 border-black shadow-[4px_4px_0_0_#000] z-50 text-left flex flex-col gap-1"
                   style={{ padding: '8px' }}
                 >
                   {isLoggedIn && user ? (
