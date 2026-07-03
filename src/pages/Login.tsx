@@ -23,9 +23,17 @@ export const Login: React.FC = () => {
 
     // Check for session expired query param
     const params = new URLSearchParams(window.location.search);
-    if (params.get('expired') === 'true') {
+    const expired = params.get('expired') === 'true';
+    const timeout = params.get('reason') === 'timeout';
+    
+    if (timeout) {
       setAlert({
-        message: 'Sesi Anda telah kedalwuarsa atau tidak valid. Silakan masuk kembali.',
+        message: 'Sesi Anda telah berakhir karena tidak ada aktivitas selama 30 menit. Silakan masuk kembali.',
+        type: 'warning'
+      });
+    } else if (expired) {
+      setAlert({
+        message: 'Sesi Anda telah kedaluwarsa atau tidak valid. Silakan masuk kembali.',
         type: 'warning'
       });
     }

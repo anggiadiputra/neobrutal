@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastProvider } from './components/ui/Toast';
 import Loader from './components/ui/Loader';
 import { Analytics } from '@vercel/analytics/react';
+import IdleTimer from './components/ui/IdleTimer';
 
 // Lazy load Public Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -44,6 +45,7 @@ export default function App() {
   return (
     <ToastProvider>
       <Router>
+        <IdleTimer />
         <Suspense fallback={<Loader />}>
           <Routes>
             {/* Public Routes */}
