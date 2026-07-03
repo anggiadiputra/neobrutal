@@ -8,6 +8,14 @@ interface TurnstileProps {
 
 export const Turnstile: React.FC<TurnstileProps> = ({ siteKey, onVerify, onExpire }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const verifyRef = useRef(onVerify);
+  const expireRef = useRef(onExpire);
+
+  // Sync callbacks to refs
+  useEffect(() => {
+    verifyRef.current = onVerify;
+    expireRef.current = onExpire;
+  }, [onVerify, onExpire]);
 
   useEffect(() => {
     let widgetId: string | null = null;
@@ -17,8 +25,8 @@ export const Turnstile: React.FC<TurnstileProps> = ({ siteKey, onVerify, onExpir
         try {
           widgetId = window.turnstile.render(containerRef.current, {
             sitekey: siteKey,
-            callback: onVerify,
-            'expired-callback': onExpire,
+            callback: (token: string) => verifyRef.current(token),
+            'expired-callback': () => expireRef.current?.(),
           });
         } catch (err) {
           console.warn('Turnstile rendering failed:', err);
@@ -50,7 +58,7 @@ export const Turnstile: React.FC<TurnstileProps> = ({ siteKey, onVerify, onExpir
         }
       }
     };
-  }, [siteKey, onVerify, onExpire]);
+  }, [siteKey]);
 
   return <div ref={containerRef} className="my-3 flex justify-center" />;
 };
