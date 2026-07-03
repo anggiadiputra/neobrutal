@@ -227,12 +227,12 @@ export const Prices: React.FC = () => {
               <table className="w-full border-collapse text-left text-xs font-bold text-black">
                 <thead>
                   <tr className="bg-zinc-100 border-b-3 border-black text-black">
-                    <th className="p-4 border-r-2 border-black">Extension</th>
-                    <th className="p-4 border-r-2 border-black text-right">Registration</th>
-                    <th className="p-4 border-r-2 border-black text-right">Transfer</th>
-                    <th className="p-4 border-r-2 border-black text-right">Renewal</th>
-                    <th className="p-4 border-r-2 border-black text-right">Restore</th>
-                    <th className="p-4 text-center" style={{ width: '120px' }}>Aksi</th>
+                    <th className="py-2.5 px-4 border-r-2 border-black">Extension</th>
+                    <th className="py-2.5 px-4 border-r-2 border-black text-right">Registration</th>
+                    <th className="py-2.5 px-4 border-r-2 border-black text-right">Transfer</th>
+                    <th className="py-2.5 px-4 border-r-2 border-black text-right">Renewal</th>
+                    <th className="py-2.5 px-4 border-r-2 border-black text-right">Restore</th>
+                    <th className="py-2.5 px-4 text-center" style={{ width: '120px' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -244,7 +244,7 @@ export const Prices: React.FC = () => {
 
                     return (
                       <tr key={item.extension} className="border-b-2 border-black hover:bg-zinc-50">
-                        <td className="p-4 border-r-2 border-black font-extrabold flex items-center gap-2">
+                        <td className="py-2 px-4 border-r-2 border-black font-extrabold flex items-center gap-2">
                           <span className="font-mono text-cyan-600 bg-cyan-50 px-2 py-0.5 border border-cyan-300">
                             {item.extension}
                           </span>
@@ -254,7 +254,7 @@ export const Prices: React.FC = () => {
                             </span>
                           )}
                         </td>
-                        <td className="p-4 border-r-2 border-black text-right font-bold">
+                        <td className="py-2 px-4 border-r-2 border-black text-right font-bold">
                           {isPromoActive ? (
                             <div className="flex flex-col items-end">
                               <span className="line-through text-[10px] text-zinc-400">
@@ -268,20 +268,20 @@ export const Prices: React.FC = () => {
                             formatCurrency(item.registerPrice)
                           )}
                         </td>
-                        <td className="p-4 border-r-2 border-black text-right">
+                        <td className="py-2 px-4 border-r-2 border-black text-right">
                           {formatCurrency(item.transferPrice)}
                         </td>
-                        <td className="p-4 border-r-2 border-black text-right">
+                        <td className="py-2 px-4 border-r-2 border-black text-right">
                           {formatCurrency(item.renewPrice)}
                         </td>
-                        <td className="p-4 border-r-2 border-black text-right">
+                        <td className="py-2 px-4 border-r-2 border-black text-right">
                           {formatCurrency(getRestorePrice(item.extension, item.renewPrice))}
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="py-2 px-4 text-center">
                           <button
                             onClick={() => setSelectedItem(item)}
                             type="button"
-                            className="btn btn-outline py-1 px-3 text-xs font-black bg-white shadow-sm"
+                            className="px-2.5 py-1 text-xs font-black bg-white border-2 border-black shadow-[2px_2px_0_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#000] transition-all rounded-sm cursor-pointer"
                           >
                             Detail
                           </button>
