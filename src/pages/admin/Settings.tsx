@@ -16,6 +16,8 @@ export default function Settings() {
   const [duitkuApiKey, setDuitkuApiKey] = useState('');
   const [duitkuSandboxEnabled, setDuitkuSandboxEnabled] = useState(true);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [fonnteToken, setFonnteToken] = useState('');
+  const [showWaToken, setShowWaToken] = useState(false);
 
   // Connection Testing States
   const [testingConnection, setTestingConnection] = useState(false);
@@ -81,6 +83,7 @@ export default function Settings() {
         setDuitkuMerchantCode(s.duitku_merchant_code || '');
         setDuitkuApiKey(s.duitku_api_key || '');
         setDuitkuSandboxEnabled(s.duitku_sandbox_enabled !== false);
+        setFonnteToken(s.fonnte_token || '');
 
         if (s.app_logo) {
           setLogoPreviewUrl(`${getApiUrl()}${s.app_logo}`);
@@ -168,6 +171,7 @@ export default function Settings() {
       duitku_merchant_code: duitkuMerchantCode.trim(),
       duitku_api_key: duitkuApiKey.trim(),
       duitku_sandbox_enabled: duitkuSandboxEnabled,
+      fonnte_token: fonnteToken.trim(),
     };
 
     if (logoBase64) {
@@ -520,8 +524,43 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* Integrasi Fonnte WhatsApp API Gateway */}
+          <div className="md:col-span-2 border-t-2 border-dashed border-zinc-300 pt-6 mt-2">
+            <h3 className="text-base font-black border-b border-dashed border-black pb-2 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 10.742c.15-.316.368-.6.643-.843c.27-.238.588-.415.932-.519a2.023 2.023 0 0 1 1.085.02c.341.109.65.295.91.543l2.84 2.84a1.8 1.8 0 0 1-.02 2.56l-.16.16a1.8 1.8 0 0 1-2.54 0L10 13.12" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c.49 0 .98-.03 1.47-.08c3.96-.46 7.03-3.69 7.37-7.66c.2-2.3-.28-4.52-1.3-6.42M12 20.25a8.966 8.966 0 0 1-5.94-2.28m5.94 2.28a9.006 9.006 0 0 0 5.94-2.28M6.06 17.97A8.967 8.967 0 0 1 3 12c0-4.03 2.65-7.44 6.32-8.58m3.74 14.55C9.5 17.65 6.5 15.5 6.5 12c0-2.3 1.5-4 4.5-4.5" />
+              </svg>
+              Integrasi Fonnte WhatsApp API Gateway
+            </h3>
+            <p className="text-[11px] text-zinc-400 font-normal mb-4">
+              Konfigurasikan token API Gateway Fonnte Anda untuk mengirim notifikasi penagihan & konfirmasi domain ke nomor WhatsApp pelanggan. Data token disimpan secara terenkripsi AES-256-CBC.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-zinc-500 font-bold text-xs">Fonnte API Token</label>
+                <div className="relative">
+                  <input
+                    type={showWaToken ? "text" : "password"}
+                    value={fonnteToken}
+                    onChange={(e) => setFonnteToken(e.target.value)}
+                    placeholder="Masukkan Token Fonnte..."
+                    className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowWaToken(!showWaToken)}
+                    className="absolute right-3 top-3 text-zinc-500 font-black text-[10px] hover:text-black uppercase cursor-pointer"
+                  >
+                    {showWaToken ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Form Actions */}
-          <div className="border-t-2 border-black pt-4 flex justify-end">
+          <div className="border-t-2 border-black pt-4 md:col-span-2 flex justify-end">
             <button
               type="submit"
               disabled={saving}

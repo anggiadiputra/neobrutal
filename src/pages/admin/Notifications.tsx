@@ -18,7 +18,8 @@ export default function Notifications() {
     notify_h0_enabled: true,
     notify_hp7_enabled: true,
     notify_payment_success_enabled: true,
-    notify_domain_active_enabled: true
+    notify_domain_active_enabled: true,
+    notify_whatsapp_enabled: false
   });
 
   // Templates
@@ -36,7 +37,14 @@ export default function Notifications() {
     template_payment_success_subject: '',
     template_payment_success_body: '',
     template_domain_active_subject: '',
-    template_domain_active_body: ''
+    template_domain_active_body: '',
+    template_h30_wa: '',
+    template_h7_wa: '',
+    template_h3_wa: '',
+    template_h0_wa: '',
+    template_hp7_wa: '',
+    template_payment_success_wa: '',
+    template_domain_active_wa: ''
   });
 
   const loadSettings = async () => {
@@ -53,7 +61,8 @@ export default function Notifications() {
           notify_h0_enabled: d.notify_h0_enabled !== false,
           notify_hp7_enabled: d.notify_hp7_enabled !== false,
           notify_payment_success_enabled: d.notify_payment_success_enabled !== false,
-          notify_domain_active_enabled: d.notify_domain_active_enabled !== false
+          notify_domain_active_enabled: d.notify_domain_active_enabled !== false,
+          notify_whatsapp_enabled: d.notify_whatsapp_enabled === true
         });
 
         setTemplates({
@@ -70,7 +79,14 @@ export default function Notifications() {
           template_payment_success_subject: d.template_payment_success_subject || '',
           template_payment_success_body: d.template_payment_success_body || '',
           template_domain_active_subject: d.template_domain_active_subject || '',
-          template_domain_active_body: d.template_domain_active_body || ''
+          template_domain_active_body: d.template_domain_active_body || '',
+          template_h30_wa: d.template_h30_wa || '',
+          template_h7_wa: d.template_h7_wa || '',
+          template_h3_wa: d.template_h3_wa || '',
+          template_h0_wa: d.template_h0_wa || '',
+          template_hp7_wa: d.template_hp7_wa || '',
+          template_payment_success_wa: d.template_payment_success_wa || '',
+          template_domain_active_wa: d.template_domain_active_wa || ''
         });
       }
     } catch (err: any) {
@@ -309,7 +325,7 @@ export default function Notifications() {
                   </div>
                 </div>
 
-                <div className="border-2 border-black p-4 bg-zinc-50 flex items-start gap-3 shadow-[3px_3px_0px_#000000] md:col-span-2">
+                <div className="border-2 border-black p-4 bg-zinc-50 flex items-start gap-3 shadow-[3px_3px_0px_#000000]">
                   <input
                     type="checkbox"
                     id="notify_domain_active_enabled"
@@ -323,6 +339,24 @@ export default function Notifications() {
                     </label>
                     <span className="text-xs text-zinc-500 font-bold">
                       Mengirim email konfirmasi sukses sesaat setelah proses registrasi atau perpanjangan domain selesai dilakukan di RDASH.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-2 border-black p-4 bg-green-50 flex items-start gap-3 shadow-[3px_3px_0px_#000000] md:col-span-2">
+                  <input
+                    type="checkbox"
+                    id="notify_whatsapp_enabled"
+                    checked={toggles.notify_whatsapp_enabled}
+                    onChange={() => handleToggleChange('notify_whatsapp_enabled')}
+                    className="w-5 h-5 border-3 border-black accent-green-600 rounded-sm cursor-pointer mt-0.5 shadow-[1px_1px_0px_#000000]"
+                  />
+                  <div>
+                    <label htmlFor="notify_whatsapp_enabled" className="font-extrabold text-sm uppercase block cursor-pointer text-green-800">
+                      WhatsApp Gateway (Fonnte)
+                    </label>
+                    <span className="text-xs text-green-700 font-bold">
+                      Mengirim salinan notifikasi tagihan, pengingat jatuh tempo, konfirmasi pembayaran, dan aktivasi domain langsung ke WhatsApp pelanggan menggunakan Fonnte API.
                     </span>
                   </div>
                 </div>
@@ -398,27 +432,52 @@ export default function Notifications() {
               </div>
 
               {/* Editor Fields */}
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className="text-xs uppercase font-black block mb-2">Subject Email</label>
-                  <input
-                    type="text"
-                    value={templates[`template_${activeTemplate}_subject`] || ''}
-                    onChange={(e) => handleTemplateChange(`template_${activeTemplate}_subject`, e.target.value)}
-                    placeholder="Masukkan subjek email..."
-                    className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Email Section */}
+                <div className="flex flex-col gap-4 border-2 border-black p-4 bg-zinc-50 shadow-[3px_3px_0px_#000000]">
+                  <h3 className="text-sm font-black uppercase border-b-2 border-black pb-2 mb-2 flex items-center gap-1.5 text-zinc-800">
+                    ✉️ Saluran Email
+                  </h3>
+                  
+                  <div>
+                    <label className="text-xs uppercase font-black block mb-2">Subject Email</label>
+                    <input
+                      type="text"
+                      value={templates[`template_${activeTemplate}_subject`] || ''}
+                      onChange={(e) => handleTemplateChange(`template_${activeTemplate}_subject`, e.target.value)}
+                      placeholder="Masukkan subjek email..."
+                      className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs uppercase font-black block mb-2">Isi Email (Format HTML)</label>
+                    <textarea
+                      rows={12}
+                      value={templates[`template_${activeTemplate}_body`] || ''}
+                      onChange={(e) => handleTemplateChange(`template_${activeTemplate}_body`, e.target.value)}
+                      placeholder="Masukkan tag HTML untuk isi pesan..."
+                      className="w-full border-3 border-black p-3 font-mono text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs uppercase font-black block mb-2">Isi Email (Format HTML)</label>
-                  <textarea
-                    rows={12}
-                    value={templates[`template_${activeTemplate}_body`] || ''}
-                    onChange={(e) => handleTemplateChange(`template_${activeTemplate}_body`, e.target.value)}
-                    placeholder="Masukkan tag HTML untuk isi pesan..."
-                    className="w-full border-3 border-black p-3 font-mono text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
-                  />
+                {/* WhatsApp Section */}
+                <div className="flex flex-col gap-4 border-2 border-black p-4 bg-green-50 shadow-[3px_3px_0px_#000000]">
+                  <h3 className="text-sm font-black uppercase border-b-2 border-black pb-2 mb-2 flex items-center gap-1.5 text-green-800">
+                    💬 Saluran WhatsApp
+                  </h3>
+
+                  <div>
+                    <label className="text-xs uppercase font-black block mb-2">Isi Pesan WhatsApp (Format Teks & Emoji)</label>
+                    <textarea
+                      rows={16}
+                      value={templates[`template_${activeTemplate}_wa`] || ''}
+                      onChange={(e) => handleTemplateChange(`template_${activeTemplate}_wa`, e.target.value)}
+                      placeholder="Gunakan formatting WhatsApp seperti *tebal*, _miring_, dan emoji..."
+                      className="w-full border-3 border-black p-3 font-semibold text-sm focus:outline-none focus:bg-emerald-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -480,27 +539,52 @@ export default function Notifications() {
               </div>
 
               {/* Editor Fields */}
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className="text-xs uppercase font-black block mb-2">Subject Email</label>
-                  <input
-                    type="text"
-                    value={templates[`template_${activeTemplate}_subject`] || ''}
-                    onChange={(e) => handleTemplateChange(`template_${activeTemplate}_subject`, e.target.value)}
-                    placeholder="Masukkan subjek email..."
-                    className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Email Section */}
+                <div className="flex flex-col gap-4 border-2 border-black p-4 bg-zinc-50 shadow-[3px_3px_0px_#000000]">
+                  <h3 className="text-sm font-black uppercase border-b-2 border-black pb-2 mb-2 flex items-center gap-1.5 text-zinc-800">
+                    ✉️ Saluran Email
+                  </h3>
+                  
+                  <div>
+                    <label className="text-xs uppercase font-black block mb-2">Subject Email</label>
+                    <input
+                      type="text"
+                      value={templates[`template_${activeTemplate}_subject`] || ''}
+                      onChange={(e) => handleTemplateChange(`template_${activeTemplate}_subject`, e.target.value)}
+                      placeholder="Masukkan subjek email..."
+                      className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs uppercase font-black block mb-2">Isi Email (Format HTML)</label>
+                    <textarea
+                      rows={12}
+                      value={templates[`template_${activeTemplate}_body`] || ''}
+                      onChange={(e) => handleTemplateChange(`template_${activeTemplate}_body`, e.target.value)}
+                      placeholder="Masukkan tag HTML untuk isi pesan..."
+                      className="w-full border-3 border-black p-3 font-mono text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs uppercase font-black block mb-2">Isi Email (Format HTML)</label>
-                  <textarea
-                    rows={12}
-                    value={templates[`template_${activeTemplate}_body`] || ''}
-                    onChange={(e) => handleTemplateChange(`template_${activeTemplate}_body`, e.target.value)}
-                    placeholder="Masukkan tag HTML untuk isi pesan..."
-                    className="w-full border-3 border-black p-3 font-mono text-sm focus:outline-none focus:bg-rose-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
-                  />
+                {/* WhatsApp Section */}
+                <div className="flex flex-col gap-4 border-2 border-black p-4 bg-green-50 shadow-[3px_3px_0px_#000000]">
+                  <h3 className="text-sm font-black uppercase border-b-2 border-black pb-2 mb-2 flex items-center gap-1.5 text-green-800">
+                    💬 Saluran WhatsApp
+                  </h3>
+
+                  <div>
+                    <label className="text-xs uppercase font-black block mb-2">Isi Pesan WhatsApp (Format Teks & Emoji)</label>
+                    <textarea
+                      rows={16}
+                      value={templates[`template_${activeTemplate}_wa`] || ''}
+                      onChange={(e) => handleTemplateChange(`template_${activeTemplate}_wa`, e.target.value)}
+                      placeholder="Gunakan formatting WhatsApp seperti *tebal*, _miring_, dan emoji..."
+                      className="w-full border-3 border-black p-3 font-semibold text-sm focus:outline-none focus:bg-emerald-50 shadow-[3px_3px_0px_#000000] focus:shadow-[1px_1px_0px_#000000] focus:translate-x-[2px] focus:translate-y-[2px] transition-all"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
