@@ -180,7 +180,7 @@ export const Login: React.FC = () => {
   return (
     <Layout title="Masuk ke Portal">
       <section className="flex items-center justify-center py-20 min-h-[70vh] bg-zinc-100">
-        <div className="container max-w-md px-4 text-center">
+        <div className="w-full max-w-md px-4 text-center mx-auto">
           <div className="card p-8 sm:p-10 bg-white border-3 border-black shadow-[6px_6px_0_#000] rounded-sm text-left">
             {/* Step 1 Header */}
             {step === 1 && (

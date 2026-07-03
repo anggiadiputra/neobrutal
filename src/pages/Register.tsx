@@ -317,7 +317,7 @@ export const Register: React.FC = () => {
     <Layout title="Daftar Akun Baru">
       <section className="py-12 bg-zinc-100 min-h-[80vh] flex items-center justify-center">
         <div
-          className={`container px-4 ${
+          className={`w-full mx-auto px-4 ${
             domainParam ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-5xl' : 'max-w-xl'
           }`}
         >
