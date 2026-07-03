@@ -487,4 +487,25 @@ body[data-theme="dark"] .badge {
   animation: slide-in-bottom 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ── Font Size Adjustments for Space Grotesk Readability ── */
+.text-\[10px\] {
+  font-size: 12px !important;
+  letter-spacing: 0.01em;
+}
+.text-\[11px\] {
+  font-size: 12.5px !important;
+  letter-spacing: 0.01em;
+}
+.text-xs {
+  font-size: 0.825rem !important; /* ~13.2px instead of 12px */
+  letter-spacing: 0.01em;
+}
+.text-sm {
+  font-size: 0.925rem !important; /* ~14.8px instead of 14px */
+}
+.form-label {
+  font-size: 0.875rem !important;
+  font-weight: 800 !important;
+}
+
 
