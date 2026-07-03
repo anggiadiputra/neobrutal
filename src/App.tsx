@@ -38,6 +38,7 @@ const AdminTransactions = lazy(() => import('./pages/admin/Transactions'));
 const AdminDomains = lazy(() => import('./pages/admin/Domains'));
 const AdminCustomers = lazy(() => import('./pages/admin/Customers'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
+const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 
 export default function App() {
   return (
@@ -79,6 +80,7 @@ export default function App() {
             <Route path="/admin/domains" element={<AdminDomains />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
 
             {/* Fallback / Catch-All Redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
