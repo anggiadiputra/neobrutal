@@ -208,8 +208,11 @@ export default function Transactions() {
           <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-black text-zinc-500 uppercase">Total Transaksi</span>
-              <div className="w-8 h-8 border-2 border-black bg-indigo-200 flex items-center justify-center rounded-sm">
-                📋
+              <div className="w-8 h-8 border-2 border-black bg-indigo-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                </svg>
               </div>
             </div>
             <h2 className="text-3xl font-black">{totalCount}</h2>
@@ -220,8 +223,11 @@ export default function Transactions() {
           <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-black text-zinc-500 uppercase">Total Omset (Revenue)</span>
-              <div className="w-8 h-8 border-2 border-black bg-rose-200 flex items-center justify-center rounded-sm">
-                💵
+              <div className="w-8 h-8 border-2 border-black bg-rose-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
               </div>
             </div>
             <h2 className="text-3xl font-black">{formatCurrency(totalRevenue)}</h2>
@@ -232,8 +238,11 @@ export default function Transactions() {
           <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-black text-zinc-500 uppercase">Total Keuntungan (Margin)</span>
-              <div className="w-8 h-8 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm">
-                📈
+              <div className="w-8 h-8 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
+                </svg>
               </div>
             </div>
             <h2 className="text-3xl font-black text-emerald-600">+{formatCurrency(totalProfit)}</h2>

@@ -216,8 +216,11 @@ export default function Billing() {
           <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-black text-zinc-500 uppercase">Saldo Reseller (RDASH)</span>
-              <div className="w-8 h-8 border-2 border-black bg-rose-200 flex items-center justify-center rounded-sm">
-                💳
+              <div className="w-8 h-8 border-2 border-black bg-rose-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <line x1="2" x2="22" y1="10" y2="10" />
+                </svg>
               </div>
             </div>
             <h2 className="text-3xl font-black">{formatCurrency(balance)}</h2>
@@ -228,8 +231,11 @@ export default function Billing() {
           <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-black text-zinc-500 uppercase">Estimasi Keuntungan</span>
-              <div className="w-8 h-8 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm">
-                📈
+              <div className="w-8 h-8 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
+                </svg>
               </div>
             </div>
             <h2 className="text-3xl font-black text-emerald-600">{formatCurrency(estimatedProfit)}</h2>
@@ -240,8 +246,11 @@ export default function Billing() {
           <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-black text-zinc-500 uppercase">Total Domain Terdaftar</span>
-              <div className="w-8 h-8 border-2 border-black bg-cyan-200 flex items-center justify-center rounded-sm">
-                🌐
+              <div className="w-8 h-8 border-2 border-black bg-cyan-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" />
+                </svg>
               </div>
             </div>
             <h2 className="text-3xl font-black">{totalDomains} Domain</h2>
