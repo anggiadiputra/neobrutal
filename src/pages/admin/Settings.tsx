@@ -324,69 +324,7 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Payment Gateways */}
-          <div>
-            <h3 className="text-base font-black border-b border-dashed border-black pb-2 mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                <line x1="1" y1="10" x2="23" y2="10" />
-              </svg>
-              Metode Pembayaran (Payment Gateway)
-            </h3>
-            <p className="text-[11px] text-zinc-400 font-normal mb-3">
-              Pilih metode pembayaran mana saja yang ingin Anda tampilkan ke customer pada halaman transaksi.
-            </p>
 
-            <div className="flex flex-col gap-2">
-              {/* QRIS */}
-              <div className="flex justify-between items-center bg-zinc-50 p-3 border-2 border-black rounded-sm">
-                <div>
-                  <div className="text-xs font-black text-black">Gerbang QRIS (E-Wallet)</div>
-                  <div className="text-[10px] text-zinc-400 font-normal">GoPay, OVO, Dana, LinkAja</div>
-                </div>
-                <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={gwQris}
-                    onChange={(e) => setGwQris(e.target.checked)}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              {/* VA */}
-              <div className="flex justify-between items-center bg-zinc-50 p-3 border-2 border-black rounded-sm">
-                <div>
-                  <div className="text-xs font-black text-black">Virtual Account (Transfer Bank)</div>
-                  <div className="text-[10px] text-zinc-400 font-normal">Virtual Account bank-bank nasional utama</div>
-                </div>
-                <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={gwBank}
-                    onChange={(e) => setGwBank(e.target.checked)}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              {/* CC */}
-              <div className="flex justify-between items-center bg-zinc-50 p-3 border-2 border-black rounded-sm">
-                <div>
-                  <div className="text-xs font-black text-black">Kartu Kredit (Visa/Mastercard)</div>
-                  <div className="text-[10px] text-zinc-400 font-normal">Pembayaran langsung kartu kredit/debit</div>
-                </div>
-                <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={gwCc}
-                    onChange={(e) => setGwCc(e.target.checked)}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
 
           {/* Integrasi Duitku Gateway */}
           <div>
