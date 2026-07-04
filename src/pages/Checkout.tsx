@@ -13,6 +13,7 @@ import {
 } from '../utils/region';
 import type { RegionItem } from '../utils/region';
 import type { DomainPriceItem } from './Prices';
+import Turnstile from '../components/ui/Turnstile';
 
 interface SystemSettings {
   tax_enabled: boolean;
@@ -93,6 +94,7 @@ export const Checkout: React.FC = () => {
   const [loginOtpCode, setLoginOtpCode] = useState('');
   const [loginStep, setLoginStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Load basic configurations
   useEffect(() => {
@@ -375,7 +377,8 @@ export const Checkout: React.FC = () => {
           city,
           state,
           postal_code: regPostal,
-          country_code: regCountry.toUpperCase()
+          country_code: regCountry.toUpperCase(),
+          turnstileToken
         })
       });
 
@@ -415,7 +418,7 @@ export const Checkout: React.FC = () => {
       const response = await apiFetch('/api/auth/login-step1', {
         method: 'POST',
         requireAuth: false,
-        body: JSON.stringify({ email, password: loginPassword })
+        body: JSON.stringify({ email, password: loginPassword, turnstileToken })
       });
 
       setLoginStep(2);
@@ -519,13 +522,13 @@ export const Checkout: React.FC = () => {
               <div className="card bg-white border-3 border-black p-0! shadow-[4px_4px_0_#000] overflow-hidden rounded-sm">
                 <div className="flex border-b-3 border-black bg-zinc-100 font-black text-xs text-zinc-500">
                   <button
-                    onClick={() => { setActiveTab('register'); setAlert(null); }}
+                    onClick={() => { setActiveTab('register'); setAlert(null); setTurnstileToken(''); }}
                     className={`flex-1 py-3 border-r-3 border-black text-center cursor-pointer transition-colors ${activeTab === 'register' ? 'bg-amber-100 text-black' : 'bg-transparent hover:bg-zinc-200'}`}
                   >
                     Daftar Akun Baru
                   </button>
                   <button
-                    onClick={() => { setActiveTab('login'); setAlert(null); }}
+                    onClick={() => { setActiveTab('login'); setAlert(null); setTurnstileToken(''); }}
                     className={`flex-1 py-3 text-center cursor-pointer transition-colors ${activeTab === 'login' ? 'bg-amber-100 text-black' : 'bg-transparent hover:bg-zinc-200'}`}
                   >
                     Masuk ke Akun
@@ -618,10 +621,16 @@ export const Checkout: React.FC = () => {
                         </div>
                       </div>
 
+                      <Turnstile
+                        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                        onVerify={(token) => setTurnstileToken(token)}
+                        onExpire={() => setTurnstileToken('')}
+                      />
+
                       <button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="btn btn-primary w-full py-2.5 font-black text-sm"
+                        disabled={isSubmitting || !turnstileToken}
+                        className="btn btn-primary w-full py-2.5 font-black text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? 'Memproses...' : 'Daftar Akun & Lanjutkan'}
                       </button>
@@ -642,10 +651,16 @@ export const Checkout: React.FC = () => {
                             <label className="text-[11px] text-zinc-500">Kata Sandi</label>
                             <input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className="px-3 py-2 border-2 border-black rounded-sm bg-white" placeholder="••••••••" />
                           </div>
+                          <Turnstile
+                            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                            onVerify={(token) => setTurnstileToken(token)}
+                            onExpire={() => setTurnstileToken('')}
+                          />
+
                           <button
                             type="submit"
-                            disabled={isSubmitting}
-                            className="btn btn-primary w-full py-2.5 font-black text-sm mt-2"
+                            disabled={isSubmitting || !turnstileToken}
+                            className="btn btn-primary w-full py-2.5 font-black text-sm mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isSubmitting ? 'Memproses...' : 'Lanjutkan ke Verifikasi OTP'}
                           </button>

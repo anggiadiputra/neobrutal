@@ -28,7 +28,7 @@ export const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(import.meta.env.DEV ? 'local-dev-bypass' : '');
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Registrar Profile State
   const [organization, setOrganization] = useState('');
@@ -570,13 +570,11 @@ export const Register: React.FC = () => {
                 </div>
 
                 {/* Cloudflare Turnstile */}
-                {!import.meta.env.DEV && (
-                  <Turnstile
-                    siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                    onVerify={(token) => setTurnstileToken(token)}
-                    onExpire={() => setTurnstileToken('')}
-                  />
-                )}
+                <Turnstile
+                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                  onVerify={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken('')}
+                />
 
                 <button
                   type="submit"
