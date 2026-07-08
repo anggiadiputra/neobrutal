@@ -387,7 +387,7 @@ export default function Transactions() {
                           >
                             Edit
                           </button>
-                          {t.status === 'PENDING' && (
+                          {['PENDING', 'FAILED'].includes(t.status) && (
                             <button
                               onClick={() => handleSyncPayment(t)}
                               disabled={syncingTxId === t.id}
