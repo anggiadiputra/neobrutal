@@ -34,6 +34,9 @@ export default function Transactions() {
   const [savingTx, setSavingTx] = useState(false);
   const [modalSuccessMsg, setModalSuccessMsg] = useState('');
   const [modalErrorMsg, setModalErrorMsg] = useState('');
+  const [syncingTxId, setSyncingTxId] = useState<number | null>(null);
+  const [syncStatusMsg, setSyncStatusMsg] = useState('');
+  const [syncErrorMsg, setSyncErrorMsg] = useState('');
 
   const loadPaymentMethods = async () => {
     try {
@@ -85,6 +88,29 @@ export default function Transactions() {
     setModalSuccessMsg('');
     setModalErrorMsg('');
     setShowEditModal(true);
+  };
+
+  const handleSyncPayment = async (tx: any) => {
+    setSyncStatusMsg('');
+    setSyncErrorMsg('');
+    setSyncingTxId(tx.id);
+
+    try {
+      const res = await apiFetch(`/api/admin/transactions/${tx.id}/sync-payment`, {
+        method: 'POST'
+      });
+
+      if (res && res.success) {
+        setSyncStatusMsg(`Sync berhasil: ${res.data.action}`);
+        await loadTransactions();
+      } else {
+        setSyncErrorMsg(res.message || 'Gagal sinkron pembayaran.');
+      }
+    } catch (err: any) {
+      setSyncErrorMsg(err.message || 'Gagal sinkron pembayaran.');
+    } finally {
+      setSyncingTxId(null);
+    }
   };
 
   const handleModalSubmit = async (e: React.FormEvent) => {
@@ -354,13 +380,22 @@ export default function Transactions() {
                           </span>
                         </td>
                         <td className="p-4 border-r border-black text-zinc-500">{new Date(t.created_at).toLocaleString('id-ID')}</td>
-                        <td className="p-4 text-center">
+                        <td className="p-4 text-center space-y-2">
                           <button
                             onClick={() => openEditModal(t)}
-                            className="bg-white hover:bg-zinc-100 text-black px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-bold rounded-sm cursor-pointer transition-all"
+                            className="bg-white hover:bg-zinc-100 text-black px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-bold rounded-sm cursor-pointer transition-all w-full"
                           >
                             Edit
                           </button>
+                          {t.status === 'PENDING' && (
+                            <button
+                              onClick={() => handleSyncPayment(t)}
+                              disabled={syncingTxId === t.id}
+                              className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover,#e0b000)] text-black px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-black rounded-sm cursor-pointer transition-all w-full disabled:bg-zinc-300 disabled:cursor-not-allowed"
+                            >
+                              {syncingTxId === t.id ? 'Sync...' : 'Sync Pembayaran'}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -376,21 +411,33 @@ export default function Transactions() {
               <span className="text-xs font-bold text-zinc-500">
                 Halaman {currentPage} dari {totalPages} (Total: {totalCount})
               </span>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  className="btn btn-outline flex-grow sm:flex-none py-1.5 px-3 text-xs font-bold bg-white"
-                >
-                  Sebelumnya
-                </button>
-                <button
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  className="btn btn-outline flex-grow sm:flex-none py-1.5 px-3 text-xs font-bold bg-white"
-                >
-                  Berikutnya
-                </button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                {syncStatusMsg && (
+                  <div className="text-[10px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-sm px-3 py-2">
+                    {syncStatusMsg}
+                  </div>
+                )}
+                {syncErrorMsg && (
+                  <div className="text-[10px] font-black text-rose-700 bg-rose-100 border border-rose-300 rounded-sm px-3 py-2">
+                    {syncErrorMsg}
+                  </div>
+                )}
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <button
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    className="btn btn-outline flex-grow sm:flex-none py-1.5 px-3 text-xs font-bold bg-white"
+                  >
+                    Sebelumnya
+                  </button>
+                  <button
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    className="btn btn-outline flex-grow sm:flex-none py-1.5 px-3 text-xs font-bold bg-white"
+                  >
+                    Berikutnya
+                  </button>
+                </div>
               </div>
             </div>
           )}
