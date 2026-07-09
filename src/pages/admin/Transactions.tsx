@@ -37,6 +37,8 @@ export default function Transactions() {
   const [syncingTxId, setSyncingTxId] = useState<number | null>(null);
   const [syncStatusMsg, setSyncStatusMsg] = useState('');
   const [syncErrorMsg, setSyncErrorMsg] = useState('');
+  const [retryingTxId, setRetryingTxId] = useState<number | null>(null);
+  const [retryMsg, setRetryMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const loadPaymentMethods = async () => {
     try {
@@ -101,7 +103,9 @@ export default function Transactions() {
       });
 
       if (res && res.success) {
-        setSyncStatusMsg(`Sync berhasil: ${res.data.action}`);
+        const action = res.data?.action;
+        const label = action === 'rdash_retried' ? 'Retry RDASH berhasil' : action === 'paid' ? 'Dibayar & diproses' : action;
+        setSyncStatusMsg(`Sync berhasil: ${label}`);
         await loadTransactions();
       } else {
         setSyncErrorMsg(res.message || 'Gagal sinkron pembayaran.');
@@ -110,6 +114,27 @@ export default function Transactions() {
       setSyncErrorMsg(err.message || 'Gagal sinkron pembayaran.');
     } finally {
       setSyncingTxId(null);
+    }
+  };
+
+  const handleRetryProvisioning = async (tx: any) => {
+    if (!window.confirm(`Retry provisioning domain "${tx.domain_name}" ke RDASH?\n\nSistem akan verifikasi ke Duitku dulu bahwa pembayaran sudah terkonfirmasi, lalu mendaftarkan ulang domain ke registrar.`)) return;
+    setRetryMsg(null);
+    setRetryingTxId(tx.id);
+    try {
+      const res = await apiFetch(`/api/admin/transactions/${tx.id}/retry-provisioning`, {
+        method: 'POST'
+      });
+      if (res && res.success) {
+        setRetryMsg({ type: 'success', text: res.message || 'Retry berhasil!' });
+        await loadTransactions();
+      } else {
+        setRetryMsg({ type: 'error', text: res.message || 'Retry gagal.' });
+      }
+    } catch (err: any) {
+      setRetryMsg({ type: 'error', text: err.message || 'Retry gagal.' });
+    } finally {
+      setRetryingTxId(null);
     }
   };
 
@@ -387,13 +412,22 @@ export default function Transactions() {
                           >
                             Edit
                           </button>
-                          {['PENDING', 'FAILED'].includes(t.status) && (
+                          {['PENDING', 'FAILED', 'REGISTRATION_FAILED', 'RENEWAL_FAILED'].includes(t.status) && (
                             <button
                               onClick={() => handleSyncPayment(t)}
-                              disabled={syncingTxId === t.id}
+                              disabled={syncingTxId === t.id || retryingTxId === t.id}
                               className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover,#e0b000)] text-black px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-black rounded-sm cursor-pointer transition-all w-full disabled:bg-zinc-300 disabled:cursor-not-allowed"
                             >
-                              {syncingTxId === t.id ? 'Sync...' : 'Sync Pembayaran'}
+                              {syncingTxId === t.id ? 'Sync...' : 'Sync Bayar'}
+                            </button>
+                          )}
+                          {['REGISTRATION_FAILED', 'RENEWAL_FAILED'].includes(t.status) && (
+                            <button
+                              onClick={() => handleRetryProvisioning(t)}
+                              disabled={retryingTxId === t.id || syncingTxId === t.id}
+                              className="bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-black rounded-sm cursor-pointer transition-all w-full disabled:bg-zinc-300 disabled:text-zinc-500 disabled:cursor-not-allowed"
+                            >
+                              {retryingTxId === t.id ? 'Retry...' : '🔁 Retry RDASH'}
                             </button>
                           )}
                         </td>
@@ -414,12 +448,21 @@ export default function Transactions() {
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 {syncStatusMsg && (
                   <div className="text-[10px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-sm px-3 py-2">
-                    {syncStatusMsg}
+                    ✓ {syncStatusMsg}
                   </div>
                 )}
                 {syncErrorMsg && (
                   <div className="text-[10px] font-black text-rose-700 bg-rose-100 border border-rose-300 rounded-sm px-3 py-2">
-                    {syncErrorMsg}
+                    ✕ {syncErrorMsg}
+                  </div>
+                )}
+                {retryMsg && (
+                  <div className={`text-[10px] font-black rounded-sm px-3 py-2 border ${
+                    retryMsg.type === 'success'
+                      ? 'text-emerald-700 bg-emerald-100 border-emerald-300'
+                      : 'text-rose-700 bg-rose-100 border-rose-300'
+                  }`}>
+                    {retryMsg.type === 'success' ? '✓ ' : '✕ '}{retryMsg.text}
                   </div>
                 )}
                 <div className="flex gap-2 w-full sm:w-auto">
