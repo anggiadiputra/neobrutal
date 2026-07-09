@@ -11,6 +11,12 @@ export default function Transactions() {
   const [totalCount, setTotalCount] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalProfit, setTotalProfit] = useState(0);
+  const [successCount, setSuccessCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
+
+  const [appName, setAppName] = useState('Ruangtunggu');
+  const [settings, setSettings] = useState<any>({ tax_enabled: true, tax_rate: 11 });
 
   // Filters & search
   const [searchInput, setSearchInput] = useState('');
@@ -53,6 +59,19 @@ export default function Transactions() {
 
   useEffect(() => {
     loadPaymentMethods();
+
+    const loadSettings = async () => {
+      try {
+        const res = await apiFetch('/api/settings', { requireAuth: false });
+        if (res?.success && res.data) {
+          setSettings(res.data);
+          if (res.data.app_name) setAppName(res.data.app_name);
+        }
+      } catch (e) {
+        console.warn('Failed to load settings:', e);
+      }
+    };
+    loadSettings();
   }, []);
 
   const getPaymentMethodName = (code: string) => {
@@ -138,6 +157,324 @@ export default function Transactions() {
     }
   };
 
+  const handlePrintInvoice = (tx: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Gagal membuka halaman cetak. Pastikan pop-up browser diaktifkan.');
+      return;
+    }
+
+    const brandName = appName;
+    const formattedDate = new Date(tx.created_at).toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const itemPrice = Number(tx.markup_price);
+    const itemTax = Number(tx.tax);
+    const itemAdmin = Number(tx.admin_fee);
+    const itemTotal = Number(tx.grand_total);
+
+    const statusUpper = tx.status ? tx.status.toUpperCase() : 'PENDING';
+    let badgeText = 'PENDING';
+    let badgeBg = '#fef08a';
+    let badgeColor = '#854d0e';
+
+    if (statusUpper === 'SUCCESS') {
+      badgeText = 'LUNAS';
+      badgeBg = '#d1fae5';
+      badgeColor = '#065f46';
+    } else if (['FAILED', 'REGISTRATION_FAILED', 'RENEWAL_FAILED'].includes(statusUpper)) {
+      badgeText = 'GAGAL / EXP';
+      badgeBg = '#fee2e2';
+      badgeColor = '#991b1b';
+    }
+
+    const customerName = tx.customer?.name || 'Pelanggan ' + brandName;
+    const customerEmail = tx.customer?.email || '-';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice - ${tx.merchant_order_id}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1c1917;
+      padding: 40px;
+      line-height: 1.5;
+      background-color: #fff;
+    }
+    .invoice-card {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 3px solid #000;
+      padding: 40px;
+      box-shadow: 6px 6px 0px #000;
+      background-color: #fff;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #000;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+    .logo-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #78716c;
+      margin-top: 2px;
+    }
+    .invoice-title {
+      font-size: 22px;
+      font-weight: 900;
+      text-align: right;
+      text-transform: uppercase;
+    }
+    .invoice-num {
+      font-family: monospace;
+      font-size: 12px;
+      color: #78716c;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+    .invoice-info {
+      display: grid;
+      grid-template-cols: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 35px;
+    }
+    .info-block h4 {
+      margin: 0 0 6px 0;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: #78716c;
+      letter-spacing: 0.5px;
+      font-weight: 800;
+    }
+    .info-block p {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 2px solid #000;
+      text-align: left;
+      font-size: 12px;
+    }
+    th {
+      background-color: #f5f5f4;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    td {
+      font-weight: 700;
+    }
+    .totals {
+      width: 320px;
+      margin-left: auto;
+      margin-top: 15px;
+      border: 2px solid #000;
+      padding: 15px;
+      background-color: #fdfdfd;
+    }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .totals-row.grand-total {
+      border-top: 2px dashed #000;
+      font-size: 16px;
+      font-weight: 900;
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: ${badgeBg};
+      border: 2px solid #000;
+      color: ${badgeColor};
+      font-weight: 900;
+      text-transform: uppercase;
+      font-size: 11px;
+      box-shadow: 2px 2px 0px #000;
+    }
+    .footer {
+      margin-top: 60px;
+      border-top: 2px dashed #000;
+      padding-top: 20px;
+      text-align: center;
+      font-size: 11px;
+      color: #78716c;
+      font-weight: 700;
+    }
+    .print-btn-bar {
+      max-width: 800px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .print-btn {
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 12px;
+      background-color: #fde047;
+      color: #000;
+      border: 3px solid #000;
+      padding: 8px 20px;
+      cursor: pointer;
+      box-shadow: 3px 3px 0px #000;
+      text-transform: uppercase;
+    }
+    .print-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0px #000;
+    }
+    @media print {
+      body {
+        padding: 0;
+      }
+      .invoice-card {
+        box-shadow: none;
+        border: 2px solid #000;
+      }
+      .no-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-btn-bar no-print">
+    <button class="print-btn" onclick="window.print()">Cetak / Simpan PDF</button>
+  </div>
+
+  <div class="invoice-card">
+    <div class="header">
+      <div class="logo-container">
+        <span class="logo">${brandName}</span>
+        <span class="logo-sub">Portal Registrasi Domain</span>
+      </div>
+      <div>
+        <div class="invoice-title">Bukti Pembayaran</div>
+        <div class="invoice-num">No: ${tx.merchant_order_id}</div>
+      </div>
+    </div>
+
+    <div class="invoice-info">
+      <div class="info-block">
+        <h4>Diterbitkan Kepada:</h4>
+        <p>${customerName}</p>
+        <p style="font-weight: 500; color: #78716c; font-size: 12px; margin-top: 2px;">${customerEmail}</p>
+      </div>
+      <div class="info-block" style="text-align: right;">
+        <h4>Tanggal Transaksi:</h4>
+        <p>${formattedDate}</p>
+        <div style="margin-top: 10px;">
+          <span class="badge">${badgeText}</span>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Deskripsi Item</th>
+          <th>Tipe</th>
+          <th>Durasi</th>
+          <th style="text-align: right;">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pendaftaran Nama Domain <strong>${tx.domain_name}</strong></td>
+          <td style="text-transform: capitalize;">${tx.action}</td>
+          <td>${tx.period} Tahun</td>
+          <td style="text-align: right;">${formatCurrency(itemPrice)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="invoice-info" style="margin-bottom: 0;">
+      <div class="info-block">
+        <h4>Metode Pembayaran:</h4>
+        <p style="text-transform: uppercase;">${getPaymentMethodName(tx.payment_method)}</p>
+        <p style="font-family: monospace; font-size: 11px; color: #78716c; font-weight: bold; margin-top: 2px;">
+          Ref: ${tx.payment_reference || '-'}
+        </p>
+      </div>
+      <div class="info-block">
+        <div class="totals">
+          <div class="totals-row">
+            <span>Harga Domain:</span>
+            <span>${formatCurrency(itemPrice)}</span>
+          </div>
+          ${itemTax > 0 ? `
+          <div class="totals-row">
+            <span>PPN (${settings.tax_rate || 11}%):</span>
+            <span>${formatCurrency(itemTax)}</span>
+          </div>
+          ` : ''}
+          <div class="totals-row">
+            <span>Biaya Gerbang / Admin:</span>
+            <span>${formatCurrency(itemAdmin)}</span>
+          </div>
+          <div class="totals-row grand-total">
+            <span>Total Bayar:</span>
+            <span>${formatCurrency(itemTotal)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Terima kasih atas kepercayaan Anda menggunakan layanan ${brandName}.<br>
+      Pendaftaran domain ini diproses secara otomatis dan sah secara hukum.
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTx) return;
@@ -214,9 +551,12 @@ export default function Transactions() {
         setTotalCount(meta.total || 0);
         setTotalPages(meta.last_page || 1);
 
-        const stats = meta.stats || { total_cost: 0, total_revenue: 0, total_profit: 0 };
+        const stats = meta.stats || { total_cost: 0, total_revenue: 0, total_profit: 0, success_count: 0, pending_count: 0, failed_count: 0 };
         setTotalRevenue(stats.total_revenue || 0);
         setTotalProfit(stats.total_profit || 0);
+        setSuccessCount(stats.success_count || 0);
+        setPendingCount(stats.pending_count || 0);
+        setFailedCount(stats.failed_count || 0);
       } else {
         setTransactions([]);
         setErrorMsg(res.message || 'Gagal mengambil riwayat transaksi.');
@@ -254,50 +594,94 @@ export default function Transactions() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 font-bold">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-6 font-bold">
           {/* Card 1: Total Transactions */}
-          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
+          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-4 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-black text-zinc-500 uppercase">Total Transaksi</span>
-              <div className="w-8 h-8 border-2 border-black bg-indigo-200 flex items-center justify-center rounded-sm text-black">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <span className="text-[10px] font-black text-zinc-500 uppercase">Total Transaksi</span>
+              <div className="w-7 h-7 border-2 border-black bg-indigo-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                   <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
                 </svg>
               </div>
             </div>
-            <h2 className="text-3xl font-black">{totalCount}</h2>
-            <p className="text-[10px] text-zinc-400 font-bold mt-2">Jumlah transaksi lokal tercatat</p>
+            <h2 className="text-2xl font-black">{totalCount}</h2>
+            <p className="text-[9px] text-zinc-400 font-bold mt-1">Total tercatat</p>
           </div>
 
-          {/* Card 2: Total Omset */}
-          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
+          {/* Card 2: Success Transactions */}
+          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-4 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-black text-zinc-500 uppercase">Total Omset (Revenue)</span>
-              <div className="w-8 h-8 border-2 border-black bg-rose-200 flex items-center justify-center rounded-sm text-black">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <span className="text-[10px] font-black text-zinc-500 uppercase">Sukses</span>
+              <div className="w-7 h-7 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-2xl font-black text-emerald-600">{successCount}</h2>
+            <p className="text-[9px] text-zinc-400 font-bold mt-1">Telah lunas</p>
+          </div>
+
+          {/* Card 3: Pending Transactions */}
+          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] font-black text-zinc-500 uppercase">Pending</span>
+              <div className="w-7 h-7 border-2 border-black bg-amber-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-2xl font-black text-amber-600">{pendingCount}</h2>
+            <p className="text-[9px] text-zinc-400 font-bold mt-1">Menunggu bayar</p>
+          </div>
+
+          {/* Card 4: Failed Transactions */}
+          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] font-black text-zinc-500 uppercase">Gagal</span>
+              <div className="w-7 h-7 border-2 border-black bg-rose-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-2xl font-black text-rose-600">{failedCount}</h2>
+            <p className="text-[9px] text-zinc-400 font-bold mt-1">Batal / Expired</p>
+          </div>
+
+          {/* Card 5: Total Omset */}
+          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-4 flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] font-black text-zinc-500 uppercase">Omset (Revenue)</span>
+              <div className="w-7 h-7 border-2 border-black bg-cyan-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <line x1="12" y1="1" x2="12" y2="23" />
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
               </div>
             </div>
-            <h2 className="text-3xl font-black">{formatCurrency(totalRevenue)}</h2>
-            <p className="text-[10px] text-zinc-400 font-bold mt-2">Total pembayaran dari customer</p>
+            <h2 className="text-xl font-black">{formatCurrency(totalRevenue)}</h2>
+            <p className="text-[9px] text-zinc-400 font-bold mt-1">Total revenue</p>
           </div>
 
-          {/* Card 3: Total Profit */}
-          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-6 flex flex-col justify-between">
+          {/* Card 6: Total Profit */}
+          <div className="card bg-white border-3 border-black shadow-[4px_4px_0_#000] p-4 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-black text-zinc-500 uppercase">Total Keuntungan (Margin)</span>
-              <div className="w-8 h-8 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm text-black">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <span className="text-[10px] font-black text-zinc-500 uppercase">Keuntungan (Profit)</span>
+              <div className="w-7 h-7 border-2 border-black bg-emerald-200 flex items-center justify-center rounded-sm text-black">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                   <polyline points="17 6 23 6 23 12" />
                 </svg>
               </div>
             </div>
-            <h2 className="text-3xl font-black text-emerald-600">+{formatCurrency(totalProfit)}</h2>
-            <p className="text-[10px] text-zinc-400 font-bold mt-2">Selisih markup harga jual vs modal</p>
+            <h2 className="text-xl font-black text-emerald-600">+{formatCurrency(totalProfit)}</h2>
+            <p className="text-[9px] text-zinc-400 font-bold mt-1">Selisih markup</p>
           </div>
         </div>
 
@@ -411,6 +795,12 @@ export default function Transactions() {
                             className="bg-white hover:bg-zinc-100 text-black px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-bold rounded-sm cursor-pointer transition-all w-full"
                           >
                             Edit
+                          </button>
+                          <button
+                            onClick={() => handlePrintInvoice(t)}
+                            className="bg-white hover:bg-zinc-100 text-black px-2 py-1 border-2 border-black shadow-[2px_2px_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_#000] text-[10px] font-bold rounded-sm cursor-pointer transition-all w-full"
+                          >
+                            Cetak Invoice
                           </button>
                           {['PENDING', 'FAILED', 'REGISTRATION_FAILED', 'RENEWAL_FAILED'].includes(t.status) && (
                             <button

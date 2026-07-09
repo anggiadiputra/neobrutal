@@ -216,6 +216,22 @@ export const Billing: React.FC = () => {
     const itemAdmin = Number(tx.admin_fee);
     const itemTotal = Number(tx.grand_total);
 
+    // Dynamic badge settings based on status
+    const statusUpper = tx.status ? tx.status.toUpperCase() : 'PENDING';
+    let badgeText = 'PENDING';
+    let badgeBg = '#fef08a';
+    let badgeColor = '#854d0e';
+
+    if (statusUpper === 'SUCCESS') {
+      badgeText = 'LUNAS';
+      badgeBg = '#d1fae5';
+      badgeColor = '#065f46';
+    } else if (['FAILED', 'REGISTRATION_FAILED', 'RENEWAL_FAILED'].includes(statusUpper)) {
+      badgeText = 'GAGAL / EXP';
+      badgeBg = '#fee2e2';
+      badgeColor = '#991b1b';
+    }
+
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -338,9 +354,9 @@ export const Billing: React.FC = () => {
     .badge {
       display: inline-block;
       padding: 6px 12px;
-      background-color: #d1fae5;
+      background-color: ${badgeBg};
       border: 2px solid #000;
-      color: #065f46;
+      color: ${badgeColor};
       font-weight: 900;
       text-transform: uppercase;
       font-size: 11px;
@@ -418,7 +434,7 @@ export const Billing: React.FC = () => {
         <h4>Tanggal Transaksi:</h4>
         <p>${formattedDate}</p>
         <div style="margin-top: 10px;">
-          <span class="badge">Lunas</span>
+          <span class="badge">${badgeText}</span>
         </div>
       </div>
     </div>
@@ -567,23 +583,22 @@ export const Billing: React.FC = () => {
                         {getStatusBadge(t.status)}
                       </td>
                       <td className="p-4 text-center">
-                        {t.status.toUpperCase() === 'PENDING' ? (
-                          <button
-                            onClick={() => handlePayNow(t)}
-                            className="px-2.5 py-1 text-[10px] font-black border-2 border-black bg-yellow-300 hover:bg-yellow-400 cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 transition-all text-black uppercase"
-                          >
-                            Bayar
-                          </button>
-                        ) : t.status.toUpperCase() === 'SUCCESS' ? (
+                        <div className="flex gap-1.5 justify-center">
+                          {t.status.toUpperCase() === 'PENDING' && (
+                            <button
+                              onClick={() => handlePayNow(t)}
+                              className="px-2.5 py-1 text-[10px] font-black border-2 border-black bg-yellow-300 hover:bg-yellow-400 cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 transition-all text-black uppercase"
+                            >
+                              Bayar
+                            </button>
+                          )}
                           <button
                             onClick={() => handlePrintInvoice(t)}
-                            className="px-2.5 py-1 text-[10px] font-black border-2 border-black bg-emerald-200 hover:bg-emerald-300 cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 transition-all text-black uppercase"
+                            className="px-2.5 py-1 text-[10px] font-black border-2 border-black bg-white hover:bg-zinc-100 cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 transition-all text-black uppercase"
                           >
                             Cetak
                           </button>
-                        ) : (
-                          <span className="text-zinc-400">-</span>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -596,5 +611,6 @@ export const Billing: React.FC = () => {
     </DashboardLayout>
   );
 };
+
 
 export default Billing;
